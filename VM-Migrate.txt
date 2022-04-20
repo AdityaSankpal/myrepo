@@ -1,0 +1,133 @@
+
+
+	Migrate a On-Prem VM to AWS  {OVA Format}
+
+
+
+STEP 1
+Create a file trust-policy.json
+
+-----------------------------------------------------------------------
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Principal": { "Service": "vmie.amazonaws.com" },
+         "Action": "sts:AssumeRole",
+         "Condition": {
+            "StringEquals":{
+               "sts:Externalid": "vmimport"
+            }
+         }
+      }
+   ]
+}
+------------------------------------------------------------------------
+
+Command:
+aws iam create-role --role-name vmimport --assume-role-policy-document file://trust-policy.json
+
+_____________________________________________________________________________________________________
+
+
+
+STEP 2
+Create a file role-policy.json
+-------------------------------------------------------------------------
+{
+   "Version":"2012-10-17",
+   "Statement":[
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket" 
+         ],
+         "Resource": [
+            "arn:aws:s3:::migrate-os-test",
+            "arn:aws:s3:::migrate-os-test/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "s3:GetBucketLocation",
+            "s3:GetObject",
+            "s3:ListBucket",
+            "s3:PutObject",
+            "s3:GetBucketAcl"
+         ],
+         "Resource": [
+            "arn:aws:s3:::migrate-os-test",
+            "arn:aws:s3:::migrate-os-test/*"
+         ]
+      },
+      {
+         "Effect": "Allow",
+         "Action": [
+            "ec2:ModifySnapshotAttribute",
+            "ec2:CopySnapshot",
+            "ec2:RegisterImage",
+            "ec2:Describe*"
+         ],
+         "Resource": "*"
+      }
+   ]
+}
+-----------------------------------------------------------------------
+
+Command:
+aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
+
+_____________________________________________________________________________________________________
+
+
+
+STEP 3
+Create a file containers.json
+-----------------------------------------------------------------------
+[
+  {
+    "Description": "My Server OVA",
+    "Format": "ova",
+    "UserBucket": {
+        "S3Bucket": "migrate-os-test",
+        "S3Key": "Ubuntu.ova"
+    }
+}]
+------------------------------------------------------------------------
+
+Command:
+aws ec2 import-image --description "My Linux VM OVA" --disk-containers file://containers.json
+
+______________________________________________________________________________________________________
+
+
+---To check status of import in progress:
+
+Command:
+aws ec2 describe-import-image-tasks --import-task-ids import-ami-0b1cd65dff72a7de9
+
+
+
+=========================================================================
+Status values include the following:
+
+    active — The import task is in progress.
+
+    deleting — The import task is being canceled.
+
+    deleted — The import task is canceled.
+
+    updating — Import status is updating.
+
+    validating — The imported image is being validated.
+
+    validated — The imported image was validated.
+
+    converting — The imported image is being converted into an AMI.
+
+    completed — The import task is completed and the AMI is ready to use.
+

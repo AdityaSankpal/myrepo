@@ -1,0 +1,3 @@
+<h1>welcome to amazon bucket 	server...</h1>	
+<h2> welcome to amazon web server...</h2>
+<h3>welcome to ansible server..</h3>

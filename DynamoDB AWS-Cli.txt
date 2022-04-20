@@ -1,0 +1,46 @@
+
+DynamoDB
+
+Install MySQL/MariaDB Client
+Copy paste the below in the EC2 user-data field
+#!/bin/bash
+yum -y install mariadb
+
+
+
+aws configure
+
+AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+Default region name [None]: us-west-2
+Default output format [None]:
+ 
+
+
+{"studentId":{"S":"1"},"studentDetails":{"S":"[{Name:'Suresh Pardeshi',Age:12,Gender:Male}]"}}		>>student001.json
+{"studentId":{"S":"2"},"studentDetails":{"S":"[{Name:'Tejas Nair',Age:11,Gender:Male}]"}}		>>student002.json
+{"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Rahul Agarwal',Age:11,Gender:Male}]"}}		>>student003.json
+{"studentId":{"S":"4"},"studentDetails":{"S":"[{Name:'Vivek Dixit',Age:7,Gender:Male}]"}}		>>student004.json
+
+
+
+aws dynamodb put-item --table-name aws-students --item file://student001.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student002.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student004.json --return-consumed-capacity TOTAL
+
+
+
+Retrive Records
+aws dynamodb get-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
+
+
+To Update a Entry
+{"studentId":{"S":"4"},"studentDetails":{"S":"[{Name:'Vivek Dixit',Age:7,Gender:Male}]"}}		>>student004.json
+
+aws dynamodb put-item --table-name aws-students --item file://student004.json --return-consumed-capacity TOTAL
+
+
+
+Delete a Item
+aws dynamodb delete-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
